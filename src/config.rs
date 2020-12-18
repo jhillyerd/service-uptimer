@@ -11,13 +11,15 @@ struct Service {
 #[derive(Deserialize, Debug)]
 struct Check {
     name: String,
+
+    #[serde(flatten)]
     checker: Checker,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase")]
 enum Checker {
-    Dummy,
+    Dummy {},
     TCP { host: String, port: u16 }
 }
 
@@ -46,15 +48,13 @@ mod tests {
             "checks": [
                 {
                     "name": "cn1",
-                    "checker": "dummy"
+                    "dummy": {}
                 },
                 {
                     "name": "cn2",
-                    "checker": {
-                        "tcp": {
-                            "host": "localhost",
-                            "port": 22
-                        }
+                    "tcp": {
+                        "host": "localhost",
+                        "port": 22
                     }
                 }
             ]
@@ -64,9 +64,25 @@ mod tests {
 
         assert_eq!(actual.name, "sn");
         assert_eq!(actual.description, Some("sd".to_string()));
+
+        // Verify tags.
         let actual_tags = actual.tags.expect("tags should not be None");
         assert_eq!(actual_tags.len(), 2);
         assert_eq!(actual_tags[0], "t1");
         assert_eq!(actual_tags[1], "t2");
+
+        // Verify checks.
+        assert_eq!(actual.checks.len(), 2);
+
+        let cn1 = &actual.checks[0];
+        assert_eq!(cn1.name, "cn1");
+        assert_eq!(cn1.checker, Checker::Dummy {});
+
+        let cn2 = &actual.checks[1];
+        assert_eq!(cn2.name, "cn2");
+        assert_eq!(cn2.checker, Checker::TCP {
+            host: "localhost".to_string(),
+            port: 22
+        });
     }
 }
