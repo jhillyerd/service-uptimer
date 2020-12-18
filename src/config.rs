@@ -14,6 +14,16 @@ struct Service {
 }
 
 /// A named check to perform against each host in a service.
+///
+/// `Checker` is flattened so that the JSON will be
+///
+///     "name": "my check",
+///     "tcp": { "port": 22 }
+///
+/// instead of
+///
+///     "name": "my check",
+///     "checker": { "tcp": { "port": 22 } }
 #[derive(Deserialize, Debug)]
 struct Check {
     name: String,
