@@ -1,13 +1,19 @@
 use serde::Deserialize;
 
+/// Represents a service our users wish to monitor.  A service can be composed of multiple checks
+/// against multiple hosts.
+/// 
+/// The Uptimer configuration will be comprised of a list of services to monitor.
 #[derive(Deserialize, Debug)]
 struct Service {
     name: String,
     description: Option<String>,
     tags: Option<Vec<String>>,
     checks: Vec<Check>,
+    hosts: Vec<String>,
 }
 
+/// A named check to perform against each host in a service.
 #[derive(Deserialize, Debug)]
 struct Check {
     name: String,
@@ -16,11 +22,12 @@ struct Check {
     checker: Checker,
 }
 
+/// The type and coniguration of a specific check.
 #[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase")]
 enum Checker {
     Dummy {},
-    TCP { host: String, port: u16 }
+    TCP { port: u16 }
 }
 
 #[cfg(test)]
@@ -31,7 +38,8 @@ mod tests {
     fn service_deserializes_from_minimal_json() {
         let json = r#"{
             "name": "my svc",
-            "checks": []
+            "checks": [],
+            "hosts": []
         }"#;
 
         let actual: Service = serde_json::from_str(&json).unwrap();
@@ -52,11 +60,11 @@ mod tests {
                 },
                 {
                     "name": "cn2",
-                    "tcp": {
-                        "host": "localhost",
-                        "port": 22
-                    }
+                    "tcp": { "port": 22 }
                 }
+            ],
+            "hosts": [
+                "localhost"
             ]
         }"#;
 
@@ -80,9 +88,10 @@ mod tests {
 
         let cn2 = &actual.checks[1];
         assert_eq!(cn2.name, "cn2");
-        assert_eq!(cn2.checker, Checker::TCP {
-            host: "localhost".to_string(),
-            port: 22
-        });
+        assert_eq!(cn2.checker, Checker::TCP { port: 22 });
+
+        // Verify hosts.
+        assert_eq!(actual.hosts.len(), 1);
+        assert_eq!(actual.hosts[0], "localhost");
     }
 }
