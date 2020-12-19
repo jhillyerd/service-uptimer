@@ -1,4 +1,18 @@
 use serde::Deserialize;
+use std::io;
+
+/// Top level service holder.
+#[derive(Deserialize, Debug)]
+struct Realm {
+    services: Vec<Service>,
+}
+
+impl Realm {
+    /// Reads a Realm from provided reader.
+    fn from_reader<R: io::BufRead>(rdr: R) -> serde_json::Result<Realm> {
+        serde_json::from_reader(rdr)
+    }
+}
 
 /// Represents a service our users wish to monitor.  A service can be composed of multiple checks
 /// against multiple hosts.
@@ -43,6 +57,52 @@ enum Checker {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn realm_deserializes_from_stream() {
+        let json = r#"{
+            "services": [
+                {
+                    "name": "sn1",
+                    "description": "sd1",
+                    "tags": ["t1", "t2"],
+                    "checks": [
+                        {
+                            "name": "cn1",
+                            "dummy": {}
+                        },
+                        {
+                            "name": "cn2",
+                            "tcp": { "port": 22 }
+                        }
+                    ],
+                    "hosts": [
+                        "localhost"
+                    ]
+                },
+                {
+                    "name": "sn2",
+                    "description": "sd2",
+                    "tags": ["t1", "t2"],
+                    "checks": [
+                        {
+                            "name": "cn2",
+                            "tcp": { "port": 22 }
+                        }
+                    ],
+                    "hosts": [
+                        "localhost"
+                    ]
+                }
+            ]
+        }"#;
+
+        let actual = Realm::from_reader(json.as_bytes()).unwrap();
+
+        assert_eq!(actual.services.len(), 2);
+        assert_eq!(actual.services[0].checks[0].checker, Checker::Dummy {});
+        assert_eq!(actual.services[1].checks[0].checker, Checker::TCP { port: 22 });
+    }
 
     #[test]
     fn service_deserializes_from_minimal_json() {
