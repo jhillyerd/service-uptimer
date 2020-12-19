@@ -1,0 +1,16 @@
+{
+  "services": [
+    {
+      "name": "exampleService",
+      "description": "description",
+      "tags": ["tag1"],
+      "checks": [
+        {
+          "name": "dummy 1",
+          "dummy": {}
+        }
+      ],
+      "hosts": ["example-host-1"]
+    }
+  ]
+}

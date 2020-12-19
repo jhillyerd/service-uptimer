@@ -3,13 +3,13 @@ use std::io;
 
 /// Top level service holder.
 #[derive(Deserialize, Debug)]
-struct Realm {
+pub struct Realm {
     services: Vec<Service>,
 }
 
 impl Realm {
     /// Reads a Realm from provided reader.
-    fn from_reader<R: io::BufRead>(rdr: R) -> serde_json::Result<Realm> {
+    pub fn from_reader<R: io::BufRead>(rdr: R) -> serde_json::Result<Realm> {
         serde_json::from_reader(rdr)
     }
 }
@@ -19,7 +19,7 @@ impl Realm {
 /// 
 /// The Uptimer configuration will be comprised of a list of services to monitor.
 #[derive(Deserialize, Debug)]
-struct Service {
+pub struct Service {
     name: String,
     description: Option<String>,
     tags: Option<Vec<String>>,
@@ -39,7 +39,7 @@ struct Service {
 ///     "name": "my check",
 ///     "checker": { "tcp": { "port": 22 } }
 #[derive(Deserialize, Debug)]
-struct Check {
+pub struct Check {
     name: String,
 
     #[serde(flatten)]
@@ -49,7 +49,7 @@ struct Check {
 /// The type and coniguration of a specific check.
 #[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase")]
-enum Checker {
+pub enum Checker {
     Dummy {},
     TCP { port: u16 }
 }
