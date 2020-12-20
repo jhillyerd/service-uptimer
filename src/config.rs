@@ -1,10 +1,11 @@
+use crate::checkers::{dummy, tcp};
 use serde::Deserialize;
 use std::io;
 
 /// Top level service holder.
 #[derive(Deserialize, Debug)]
 pub struct Realm {
-    services: Vec<Service>,
+    pub services: Vec<Service>,
 }
 
 impl Realm {
@@ -20,11 +21,11 @@ impl Realm {
 /// The Uptimer configuration will be comprised of a list of services to monitor.
 #[derive(Deserialize, Debug)]
 pub struct Service {
-    name: String,
-    description: Option<String>,
-    tags: Option<Vec<String>>,
-    checks: Vec<Check>,
-    hosts: Vec<String>,
+    pub name: String,
+    pub description: Option<String>,
+    pub tags: Option<Vec<String>>,
+    pub checks: Vec<Check>,
+    pub hosts: Vec<String>,
 }
 
 /// A named check to perform against each host in a service.
@@ -40,18 +41,18 @@ pub struct Service {
 ///     "checker": { "tcp": { "port": 22 } }
 #[derive(Deserialize, Debug)]
 pub struct Check {
-    name: String,
+    pub name: String,
 
     #[serde(flatten)]
-    checker: Checker,
+    pub checker: Checker,
 }
 
 /// The type and coniguration of a specific check.
 #[derive(Deserialize, Debug, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Checker {
-    Dummy {},
-    TCP { port: u16 },
+    Dummy(dummy::Checker),
+    TCP(tcp::Checker),
 }
 
 #[cfg(test)]
@@ -100,10 +101,13 @@ mod tests {
         let actual = Realm::from_reader(json.as_bytes()).unwrap();
 
         assert_eq!(actual.services.len(), 2);
-        assert_eq!(actual.services[0].checks[0].checker, Checker::Dummy {});
+        assert_eq!(
+            actual.services[0].checks[0].checker,
+            Checker::Dummy(dummy::Checker {})
+        );
         assert_eq!(
             actual.services[1].checks[0].checker,
-            Checker::TCP { port: 22 }
+            Checker::TCP(tcp::Checker { port: 22 })
         );
     }
 
@@ -157,11 +161,11 @@ mod tests {
 
         let cn1 = &actual.checks[0];
         assert_eq!(cn1.name, "cn1");
-        assert_eq!(cn1.checker, Checker::Dummy {});
+        assert_eq!(cn1.checker, Checker::Dummy(dummy::Checker {}));
 
         let cn2 = &actual.checks[1];
         assert_eq!(cn2.name, "cn2");
-        assert_eq!(cn2.checker, Checker::TCP { port: 22 });
+        assert_eq!(cn2.checker, Checker::TCP(tcp::Checker { port: 22 }));
 
         // Verify hosts.
         assert_eq!(actual.hosts.len(), 1);
