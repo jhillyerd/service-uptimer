@@ -6,8 +6,8 @@
       "tags": ["tag1"],
       "checks": [
         {
-          "name": "dummy 1",
-          "dummy": {}
+          "name": "tcp 1",
+          "tcp": {"port": 22}
         }
       ],
       "hosts": ["example-host-1"]

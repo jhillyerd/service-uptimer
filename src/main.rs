@@ -2,6 +2,7 @@ use std::env;
 use std::fs::File;
 use std::io::BufReader;
 
+mod checkers;
 mod config;
 
 fn main() {
@@ -16,6 +17,9 @@ fn main() {
     // Load config.
     let file = File::open(file_name).expect("failed to open config");
     let reader = BufReader::new(file);
-    let realm = config::Realm::from_reader(reader);
-    println!("{:?}", realm);
+    let realm = config::Realm::from_reader(reader).unwrap();
+
+    for svc in realm.services {
+        println!("{:?}", svc);
+    }
 }
