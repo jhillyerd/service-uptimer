@@ -16,7 +16,7 @@ impl Realm {
 
 /// Represents a service our users wish to monitor.  A service can be composed of multiple checks
 /// against multiple hosts.
-/// 
+///
 /// The Uptimer configuration will be comprised of a list of services to monitor.
 #[derive(Deserialize, Debug)]
 pub struct Service {
@@ -51,7 +51,7 @@ pub struct Check {
 #[serde(rename_all = "lowercase")]
 pub enum Checker {
     Dummy {},
-    TCP { port: u16 }
+    TCP { port: u16 },
 }
 
 #[cfg(test)]
@@ -101,7 +101,10 @@ mod tests {
 
         assert_eq!(actual.services.len(), 2);
         assert_eq!(actual.services[0].checks[0].checker, Checker::Dummy {});
-        assert_eq!(actual.services[1].checks[0].checker, Checker::TCP { port: 22 });
+        assert_eq!(
+            actual.services[1].checks[0].checker,
+            Checker::TCP { port: 22 }
+        );
     }
 
     #[test]
