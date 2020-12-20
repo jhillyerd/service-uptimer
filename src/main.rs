@@ -19,7 +19,14 @@ fn main() {
     let reader = BufReader::new(file);
     let realm = config::Realm::from_reader(reader).unwrap();
 
-    for svc in realm.services {
-        println!("{:?}", svc);
+    // Run checks.
+    for service in realm.services {
+        println!("\n# Service {}", service.name);
+        for host in service.hosts {
+            println!("Host {}", host);
+            for check in service.checks.iter() {
+                println!("- {:?}", check.checker);
+            }
+        }
     }
 }
