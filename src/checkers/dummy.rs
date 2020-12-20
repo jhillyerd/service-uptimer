@@ -5,7 +5,7 @@ use serde::Deserialize;
 pub struct Checker {}
 
 impl checkers::Checker for Checker {
-    fn check(&self, host: &str) -> Result<(), String> {
+    fn check(&self, _host: &str) -> Result<(), String> {
         Ok(())
     }
 }
